@@ -60,12 +60,6 @@ export default function Home() {
     <main>
       <Navbar setSearch={setSearch} setFilter={setFilter} />
 
-      <div className="video-container">
-        <video width="560" height="315" controls>
-          <source src="/Pokemon.mp4" type="video/mp4" />
-        </video>
-      </div>
-
       <h1>Pokedex</h1>
 
       <div className="poke-container">
