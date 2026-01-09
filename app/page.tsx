@@ -1,65 +1,83 @@
-import Image from "next/image";
+"use client";
+
+export const dynamic = "force-dynamic";
+
+import { useEffect, useState } from "react";
+import Navbar from "./components/navbar";
+import PokemonCard from "./components/pokemoncard";
+import { Pokemon } from "./components/types/pokemon";
 
 export default function Home() {
+  const [allPokemon, setAllPokemon] = useState<Pokemon[]>([]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+
+  const pokemonCount = 150;
+
+  const colors: Record<string, string> = {
+    fire: "#FDDFDF",
+    grass: "#DEFDE0",
+    electric: "#FCF7DE",
+    water: "#DEF3FD",
+    ground: "#f4e7da",
+    rock: "#d5d5d4",
+    fairy: "#fceaff",
+    poison: "#98d7a5",
+    bug: "#f8d5a3",
+    dragon: "#97b3e6",
+    psychic: "#eaeda1",
+    flying: "#F5F5F5",
+    fighting: "#E6E0D4",
+    normal: "#F5F5F5",
+  };
+
+  const mainTypes = Object.keys(colors);
+
+  useEffect(() => {
+    const fetchPokemons = async () => {
+      const list: Pokemon[] = [];
+
+      for (let i = 1; i <= pokemonCount; i++) {
+        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${i}`);
+        const data: Pokemon = await res.json();
+        list.push(data);
+      }
+
+      setAllPokemon(list);
+    };
+
+    fetchPokemons();
+  }, []);
+
+  const filtered = allPokemon.filter((p) => {
+    const nameMatch = p.name.includes(search.toLowerCase());
+    const typeMatch =
+      filter === "all" || p.types.some((t) => t.type.name === filter);
+    return nameMatch && typeMatch;
+  });
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main>
+      <Navbar setSearch={setSearch} setFilter={setFilter} />
+
+      <div className="video-container">
+        <video width="560" height="315" controls>
+          <source src="/Pokemon.mp4" type="video/mp4" />
+        </video>
+      </div>
+
+      <h1>Pokedex</h1>
+
+      <div className="poke-container">
+        {filtered.map((p) => (
+          <PokemonCard
+            key={p.id}
+            pokemon={p}
+            colors={colors}
+            mainTypes={mainTypes}
+          />
+        ))}
+      </div>
+    </main>
   );
 }
